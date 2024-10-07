@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canvas Drawing App</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;400;700&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            background-color: #07090c;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .canvas-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .hola {
+            border: 3px solid #000;
+            border-radius: 10px;
+            cursor: crosshair;
+            background-color: #fff;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            background-color: #07090c;
+            padding: 15px;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        .colores, .grosor, .globalAlpha-container, .botones-grosor {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        label {
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+
+        input[type="color"],
+        input[type="number"] {
+            border: none;
+            padding: 5px;
+            border-radius: 5px;
+        }
+
+        .botones-grosor button,
+        .borrar,
+        .easy1,
+        .easy2 {
+            padding: 10px;
+            margin: 5px;
+            border-radius: 10px;
+            border: 1px solid black;
+            cursor: pointer;
+            background-color: #fff;
+            color: #000;
+            font-weight: 700;
+            height: 30px;
+        }
+
+        .easy1 {
+            background-color: #fff;
+        }
+
+        .easy2 {
+            background-color: red;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="canvas-container">
+        <canvas class="hola"></canvas>
+        <aside class="controls">
+            <div class="colores">
+                <label for="base">Color</label>
+                <input id="base" type="color" name="base" value="#000000">
+            </div>
+            <div class="grosor">
+                <label for="quantity">Grosor</label>
+                <input type="number" id="quantity" name="quantity" min="1" max="20" step="1" value="1">
+            </div>
+            <div class="botones-grosor">
+                <button class="boton1" onclick="grosor10(10);">10</button>
+                <button class="boton2" onclick="grosor10(15);">15</button>
+                <button class="boton3" onclick="grosor10(20);">20</button>
+            </div>
+            <div class="globalAlpha-container">
+                <label for="globalAlpha">Alpha</label>
+                <input class="globalAlpha" type="number" id="globalAlpha" name="globalAlpha" min="0" max="1" step="0.1" value="1">
+            </div>
+            <button class="borrar" onclick="borrar();">clear</button>
+            <button class="easy1" onclick="easy(1)">White</button>
+            <button class="easy2" onclick="easy(2)">Red</button>
+        </aside>
+    </div>
+
+    <script>
+        let dibujando = false;
+        const lienzo = document.querySelector("canvas.hola");
+        lienzo.width = 1000;
+        lienzo.height = 600;
+        const context = lienzo.getContext("2d");
+
+        function aumentar(event) {
+            if (event.key === "+" && quantity.value < 20) {
+                quantity.value++;
+            } else if (event.key === "-" && quantity.value > 1) {
+                quantity.value--;
+            }
+        }
+
+        function grosor10(index) {
+            quantity.value = index;
+        }
+
+        function borrar() {
+            context.clearRect(0, 0, lienzo.width, lienzo.height);
+        }
+
+        let colorInicial = document.getElementById('base').value;
+        function easy(params) {
+            if (params === 1) {
+                colorInicial = "white";
+            } else if (params === 2) {
+                colorInicial = "red";
+            }
+        }
+
+        document.getElementById('base').addEventListener('input', function() {
+            colorInicial = this.value;
+        });
+
+        function comenzarDibujo(event) {
+            dibujando = true;
+            dibujar(event);
+        }
+
+        function terminarDibujo() {
+            dibujando = false;
+            context.beginPath();
+        }
+        
+        function dibujar(event) {
+            if (!dibujando) return;
+            const rect = lienzo.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+            
+            context.lineCap = "round";
+            context.lineWidth = quantity.value;
+            context.globalAlpha = globalAlpha.value;
+            context.strokeStyle = colorInicial;
+            context.lineTo(x, y);
+            context.stroke();
+            context.beginPath();
+            context.moveTo(x, y);
+        }
+
+        lienzo.addEventListener("mousedown", comenzarDibujo);
+        lienzo.addEventListener("mouseup", terminarDibujo);
+        lienzo.addEventListener("mousemove", dibujar);
+        lienzo.addEventListener("mouseout", terminarDibujo);
+        document.addEventListener("keyup", aumentar);
+    </script>
+</body>
+</html>
